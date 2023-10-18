@@ -31,4 +31,8 @@ contract Voting {
     );
     event ProposalRegistered(uint proposalId);
     event Voted(address voter, uint proposalId);
+
+    function helloWorld() public pure returns (string memory) {
+        return "Hello World!";
+    }
 }
