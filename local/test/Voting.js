@@ -10,6 +10,9 @@ const HAS_VOTED = 0;
 const IS_REGISTERED = 1;
 const VOTED_PROPOSAL_ID = 2;
 
+const REGISTERING_VOTERS = 0;
+const PROPOSALS_REGISTRATION_STARTED = 1;
+const PROPOSALS_REGISTRATION_ENDED = 2;
 describe("Voting", function () {
 	async function deploy() {
 		// Contracts are deployed using the first signer/account by default
@@ -57,6 +60,41 @@ describe("Voting", function () {
 			expect(voter[IS_REGISTERED]).to.equal(newVoter.isRegistered);
 			expect(voter[HAS_VOTED]).to.equal(newVoter.hasVoted);
 			expect(voter[VOTED_PROPOSAL_ID]).to.equal(newVoter.votedProposalId);
+		});
+	});
+
+	describe("Administrator opens proposals registering", function () {
+
+		it("Should have 'RegisteringVoters' as first status", async function () {
+			const { voting, owner, otherAccount } = await loadFixture(deploy);
+			expect(await voting.status()).to.equal(REGISTERING_VOTERS);
+		});
+
+		it("Should have 'ProposalsRegistrationStarted' when opening proposals registering", async function () {
+			const { voting, owner, otherAccount } = await loadFixture(deploy);
+
+			await voting.nextStatus();
+
+			expect(await voting.status()).to.equal(PROPOSALS_REGISTRATION_STARTED);
+		});
+
+		// describe("Voters can propose while proposals registration is opened", function () {
+		// 	it("Should not allow proposing when proposals registration is not opened", async function () {
+		// 		const { voting, owner, otherAccount } = await loadFixture(deploy);
+
+		// 		const couldPropose = await voting.propose(...);
+
+		// 		expect(couldPropose).to.be.false;
+		// 	});
+		// });
+
+		it("Should have 'ProposalsRegistrationEnded' when closing proposals registering", async function () {
+			const { voting, owner, otherAccount } = await loadFixture(deploy);
+
+			await voting.nextStatus();
+			await voting.nextStatus();
+
+			expect(await voting.status()).to.equal(PROPOSALS_REGISTRATION_ENDED);
 		});
 	});
 

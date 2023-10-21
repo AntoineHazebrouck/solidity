@@ -4,17 +4,21 @@ pragma solidity ^0.8.9;
 import "hardhat/console.sol";
 
 contract Voting {
+    // store current status
+    WorkflowStatus public status;
+
     // store voters
     mapping(address => Voter) public voters;
     uint public votersCount;
 
-    //
+    // store administrator address
     address private administrator;
 
     constructor(address _administrator) {
         console.log("Deploying a Voting with administrator:", _administrator);
         administrator = _administrator;
         votersCount = 0;
+        status = WorkflowStatus.RegisteringVoters;
     }
 
     function getAdministrator() public view returns (address) {
