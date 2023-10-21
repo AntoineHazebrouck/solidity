@@ -34,6 +34,21 @@ contract Voting {
         voters[msg.sender] = Voter(isRegistered, hasVoted, votedProposalId);
     }
 
+    function nextStatus() public {
+        if (status == WorkflowStatus.RegisteringVoters) {
+            status = WorkflowStatus.ProposalsRegistrationStarted;
+        } else if (status == WorkflowStatus.ProposalsRegistrationStarted) {
+            status = WorkflowStatus.ProposalsRegistrationEnded;
+        } else if (status == WorkflowStatus.ProposalsRegistrationEnded) {
+            status = WorkflowStatus.VotingSessionStarted;
+        } else if (status == WorkflowStatus.VotingSessionStarted) {
+            status = WorkflowStatus.VotingSessionEnded;
+        } else if (status == WorkflowStatus.VotingSessionEnded) {
+            status = WorkflowStatus.VotesTallied;
+        }
+        // TODO emit changement de status
+    }
+
     struct Voter {
         bool isRegistered;
         bool hasVoted;
