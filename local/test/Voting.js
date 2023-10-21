@@ -86,6 +86,25 @@ describe("Voting", function () {
 
 				expect(couldPropose).to.be.false;
 			});
+
+			it("Should allow proposing when proposals registration is opened", async function () {
+				const { voting, owner, otherAccount } = await loadFixture(deploy);
+
+				await voting.nextStatus();
+				const couldPropose = await voting.propose();
+
+				expect(couldPropose).to.be.true;
+			});
+
+			it("Should not allow proposing when proposals registration is closed", async function () {
+				const { voting, owner, otherAccount } = await loadFixture(deploy);
+
+				await voting.nextStatus();
+				await voting.nextStatus();
+				const couldPropose = await voting.propose();
+
+				expect(couldPropose).to.be.false;
+			});
 		});
 
 		it("Should have 'ProposalsRegistrationEnded' when closing proposals registering", async function () {
