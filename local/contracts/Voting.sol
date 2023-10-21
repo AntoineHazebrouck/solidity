@@ -14,6 +14,7 @@ contract Voting {
     constructor(address _administrator) {
         console.log("Deploying a Voting with administrator:", _administrator);
         administrator = _administrator;
+		votersCount = 0;
     }
 
     function getAdministrator() public view returns (address) {
@@ -25,8 +26,8 @@ contract Voting {
         bool hasVoted,
         uint votedProposalId
     ) public {
-		votersCount ++;
-		voters[votersCount] = Voter(isRegistered, hasVoted, votedProposalId);
+		votersCount = votersCount + 1;
+		// voters[votersCount] = Voter(isRegistered, hasVoted, votedProposalId);
     }
 		
     struct Voter {

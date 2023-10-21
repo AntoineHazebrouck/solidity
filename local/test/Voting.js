@@ -36,20 +36,20 @@ describe("Voting", function () {
 
 			expect(await voting.votersCount()).to.equal(0);
 		});
-		// it("Should add one voter", async function () {
-		// 	const { voting, owner, otherAccount } = await loadFixture(deploy);
+		it("Should add one voter", async function () {
+			const { voting, owner, otherAccount } = await loadFixture(deploy);
 
-		// 	const newVoter = {
-		// 		isRegistered: false,
-		// 		hasVoted: false,
-		// 		votedProposalId: otherAccount
-		// 	};
-		// 	voting.addVoter(newVoter.isRegistered, newVoter.hasVoted, newVoter.votedProposalId);
+			const newVoter = {
+				isRegistered: false,
+				hasVoted: false,
+				votedProposalId: 2
+			};
+			// !!! await ici .then faire le test
+			await voting.addVoter(newVoter.isRegistered, newVoter.hasVoted, newVoter.votedProposalId);
 
-		// 	const voters = await voting.voters;
 			
-		// 	// expect(voters.length).to.equal(1);
-		// 	expect(voters[0]).to.be.equal(newVoter);
-		// });
+			expect(await voting.votersCount()).to.equal(1);
+			expect(await voting.voters(1)).to.equal(newVoter);
+		});
 	});
 });
