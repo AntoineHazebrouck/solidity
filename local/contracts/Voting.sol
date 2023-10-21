@@ -7,6 +7,9 @@ contract Voting {
     // store current status
     WorkflowStatus public status;
 
+    // store proposals
+    uint public proposalsCount;
+
     // store voters
     mapping(address => Voter) public voters;
     uint public votersCount;
@@ -18,6 +21,7 @@ contract Voting {
         console.log("Deploying a Voting with administrator:", _administrator);
         administrator = _administrator;
         votersCount = 0;
+        proposalsCount = 0;
         status = WorkflowStatus.RegisteringVoters;
     }
 
@@ -34,12 +38,12 @@ contract Voting {
         voters[msg.sender] = Voter(isRegistered, hasVoted, votedProposalId);
     }
 
-    function propose() public view returns (bool) {
-        if (status != WorkflowStatus.ProposalsRegistrationStarted) {
-            return false;
+    function propose() public {
+        if (status == WorkflowStatus.ProposalsRegistrationStarted) {
+            voters[msg.sender].isRegistered = true;
+            proposalsCount = proposalsCount + 1;
+            emit ProposalRegistered(proposalsCount);
         }
-
-        return true;
     }
 
     function nextStatus() public {

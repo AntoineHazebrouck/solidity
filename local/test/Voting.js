@@ -82,18 +82,19 @@ describe("Voting", function () {
 			it("Should not allow proposing when proposals registration is not opened", async function () {
 				const { voting, owner, otherAccount } = await loadFixture(deploy);
 
-				const couldPropose = await voting.propose();
-
-				expect(couldPropose).to.be.false;
+				await expect(voting.propose())
+					.not.to.emit(voting, "ProposalRegistered");
 			});
 
 			it("Should allow proposing when proposals registration is opened", async function () {
 				const { voting, owner, otherAccount } = await loadFixture(deploy);
 
 				await voting.nextStatus();
-				const couldPropose = await voting.propose();
 
-				expect(couldPropose).to.be.true;
+				await expect(voting.propose())
+					.to
+					.emit(voting, "ProposalRegistered")
+					.withArgs(1);
 			});
 
 			it("Should not allow proposing when proposals registration is closed", async function () {
@@ -101,9 +102,9 @@ describe("Voting", function () {
 
 				await voting.nextStatus();
 				await voting.nextStatus();
-				const couldPropose = await voting.propose();
 
-				expect(couldPropose).to.be.false;
+				await expect(voting.propose())
+					.not.to.emit(voting, "ProposalRegistered");
 			});
 		});
 
