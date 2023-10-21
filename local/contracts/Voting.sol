@@ -34,6 +34,14 @@ contract Voting {
         voters[msg.sender] = Voter(isRegistered, hasVoted, votedProposalId);
     }
 
+    function propose() public view returns (bool) {
+        if (status != WorkflowStatus.ProposalsRegistrationStarted) {
+            return false;
+        }
+
+        return true;
+    }
+
     function nextStatus() public {
         if (status == WorkflowStatus.RegisteringVoters) {
             status = WorkflowStatus.ProposalsRegistrationStarted;

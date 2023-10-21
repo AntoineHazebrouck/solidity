@@ -78,15 +78,15 @@ describe("Voting", function () {
 			expect(await voting.status()).to.equal(PROPOSALS_REGISTRATION_STARTED);
 		});
 
-		// describe("Voters can propose while proposals registration is opened", function () {
-		// 	it("Should not allow proposing when proposals registration is not opened", async function () {
-		// 		const { voting, owner, otherAccount } = await loadFixture(deploy);
+		describe("Voters can propose while proposals registration is opened", function () {
+			it("Should not allow proposing when proposals registration is not opened", async function () {
+				const { voting, owner, otherAccount } = await loadFixture(deploy);
 
-		// 		const couldPropose = await voting.propose(...);
+				const couldPropose = await voting.propose();
 
-		// 		expect(couldPropose).to.be.false;
-		// 	});
-		// });
+				expect(couldPropose).to.be.false;
+			});
+		});
 
 		it("Should have 'ProposalsRegistrationEnded' when closing proposals registering", async function () {
 			const { voting, owner, otherAccount } = await loadFixture(deploy);
