@@ -36,6 +36,7 @@ contract Voting {
     ) public {
         votersCount = votersCount + 1;
         voters[msg.sender] = Voter(isRegistered, hasVoted, votedProposalId);
+        emit VoterRegistered(msg.sender);
     }
 
     function propose() public {

@@ -52,7 +52,10 @@ describe("Voting", function () {
 				votedProposalId: 2
 			};
 
-			await voting.addVoter(newVoter.isRegistered, newVoter.hasVoted, newVoter.votedProposalId);
+			await expect(voting.addVoter(newVoter.isRegistered, newVoter.hasVoted, newVoter.votedProposalId))
+				.to
+				.emit(voting, "VoterRegistered")
+				.withArgs(owner.address);
 
 			expect(await voting.votersCount()).to.equal(1);
 
@@ -120,5 +123,19 @@ describe("Voting", function () {
 				.withArgs(PROPOSALS_REGISTRATION_STARTED, PROPOSALS_REGISTRATION_ENDED);
 		});
 	});
+
+	// describe("Administrator opens voting session", function () {
+
+	// 	describe("Voters can only vote while voting session is open", function () {
+
+	// 		it("Should not allow voting when status is not VotingSessionStarted", async function () {
+	// 			const { voting, owner, otherAccount } = await loadFixture(deploy);
+
+	// 			await expect(voting.propose())
+	// 				.not.to.emit(voting, "ProposalRegistered");
+	// 		});
+	// 	});
+
+	// });
 
 });
