@@ -4,6 +4,31 @@ pragma solidity ^0.8.9;
 import "hardhat/console.sol";
 
 contract Voting {
+	// store voters
+	mapping (uint => Voter) public voters;
+	uint public votersCount;
+
+	// 
+    address private administrator;
+
+    constructor(address _administrator) {
+        console.log("Deploying a Voting with administrator:", _administrator);
+        administrator = _administrator;
+    }
+
+    function getAdministrator() public view returns (address) {
+        return administrator;
+    }
+
+    function addVoter(
+        bool isRegistered,
+        bool hasVoted,
+        uint votedProposalId
+    ) public {
+		votersCount ++;
+		voters[votersCount] = Voter(isRegistered, hasVoted, votedProposalId);
+    }
+		
     struct Voter {
         bool isRegistered;
         bool hasVoted;
