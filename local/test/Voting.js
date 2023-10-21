@@ -6,6 +6,10 @@ const {
 const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 const { expect } = require("chai");
 
+const HAS_VOTED = 0;
+const IS_REGISTERED = 1;
+const VOTED_PROPOSAL_ID = 2;
+
 describe("Voting", function () {
 	async function deploy() {
 		// Contracts are deployed using the first signer/account by default
@@ -44,12 +48,16 @@ describe("Voting", function () {
 				hasVoted: false,
 				votedProposalId: 2
 			};
-			// !!! await ici .then faire le test
+
 			await voting.addVoter(newVoter.isRegistered, newVoter.hasVoted, newVoter.votedProposalId);
 
-			
 			expect(await voting.votersCount()).to.equal(1);
-			expect(await voting.voters(1)).to.equal(newVoter);
+
+			const voter = await voting.voters(owner.address);
+			expect(voter[IS_REGISTERED]).to.equal(newVoter.isRegistered);
+			expect(voter[HAS_VOTED]).to.equal(newVoter.hasVoted);
+			expect(voter[VOTED_PROPOSAL_ID]).to.equal(newVoter.votedProposalId);
 		});
 	});
+
 });
