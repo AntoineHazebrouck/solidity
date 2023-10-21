@@ -47,6 +47,7 @@ contract Voting {
     }
 
     function nextStatus() public {
+        WorkflowStatus previousStatus = status;
         if (status == WorkflowStatus.RegisteringVoters) {
             status = WorkflowStatus.ProposalsRegistrationStarted;
         } else if (status == WorkflowStatus.ProposalsRegistrationStarted) {
@@ -58,7 +59,7 @@ contract Voting {
         } else if (status == WorkflowStatus.VotingSessionEnded) {
             status = WorkflowStatus.VotesTallied;
         }
-        // TODO emit changement de status
+        emit WorkflowStatusChange(previousStatus, status);
     }
 
     struct Voter {

@@ -73,9 +73,10 @@ describe("Voting", function () {
 		it("Should have 'ProposalsRegistrationStarted' when opening proposals registering", async function () {
 			const { voting, owner, otherAccount } = await loadFixture(deploy);
 
-			await voting.nextStatus();
-
-			expect(await voting.status()).to.equal(PROPOSALS_REGISTRATION_STARTED);
+			await expect(voting.nextStatus())
+				.to
+				.emit(voting, "WorkflowStatusChange")
+				.withArgs(REGISTERING_VOTERS, PROPOSALS_REGISTRATION_STARTED);
 		});
 
 		describe("Voters can propose while proposals registration is opened", function () {
@@ -112,9 +113,11 @@ describe("Voting", function () {
 			const { voting, owner, otherAccount } = await loadFixture(deploy);
 
 			await voting.nextStatus();
-			await voting.nextStatus();
 
-			expect(await voting.status()).to.equal(PROPOSALS_REGISTRATION_ENDED);
+			await expect(voting.nextStatus())
+				.to
+				.emit(voting, "WorkflowStatusChange")
+				.withArgs(PROPOSALS_REGISTRATION_STARTED, PROPOSALS_REGISTRATION_ENDED);
 		});
 	});
 
