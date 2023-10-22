@@ -26,6 +26,7 @@ contract Voting {
         administrator = _administrator;
         votersCount = 0;
         proposalsCount = 0;
+        winningProposalId = 0;
         status = WorkflowStatus.RegisteringVoters;
     }
 

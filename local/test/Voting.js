@@ -231,10 +231,6 @@ describe("Voting", function () {
 				expect(await voting.status()).to.equal(VOTES_TALLIED);
 			});
 
-			it("Should not get winner when status is not 'VotesTallied'", async function () {
-
-			});
-
 			it("Should count votes by proposal", async function () {
 				// secondAccount and thirdAccount are proposing
 				// secondAccount votes for thirdAccount's proposal
@@ -267,6 +263,44 @@ describe("Voting", function () {
 				expect((await voting.proposals(SECOND_ACCOUNT_PROPOSAL))[VOTE_COUNT]).to.equal(2);
 
 				await voting.nextStatus();
+				await voting.nextStatus();
+
+				expect(await voting.winningProposalId()).to.equal(SECOND_ACCOUNT_PROPOSAL);
+			});
+
+			it("Should set the winner only when status becomes 'VotesTallied'", async function () {
+				// secondAccount and thirdAccount are proposing
+				// secondAccount votes for thirdAccount's proposal
+				// thirdAccount votes for secondAccount's proposal
+				// fourthAccount votes for secondAccount's proposal
+				// secondAccount's proposal should win with 2 votes, thirdAccount's proposal should lose with 1 vote
+				const { firstAccount, secondAccount, thirdAccount, fourthAccount } = await getSomeAccounts();
+				const voting = await deploy(firstAccount);
+
+				expect(await voting.winningProposalId()).to.equal(0);
+
+				await voting.addVoter(secondAccount);
+				await voting.addVoter(thirdAccount);
+				await voting.addVoter(fourthAccount);
+
+				await voting.nextStatus();
+
+				await voting.proposeTest(secondAccount, "second account description");
+				await voting.proposeTest(thirdAccount, "third account description");
+
+				await voting.nextStatus();
+				await voting.nextStatus();
+
+				const SECOND_ACCOUNT_PROPOSAL = 1;
+				const THIRD_ACCOUNT_PROPOSAL = 2;
+
+				await voting.voteTest(secondAccount, THIRD_ACCOUNT_PROPOSAL);
+				await voting.voteTest(thirdAccount, SECOND_ACCOUNT_PROPOSAL);
+				await voting.voteTest(fourthAccount, SECOND_ACCOUNT_PROPOSAL);
+				await voting.nextStatus();
+
+				expect(await voting.winningProposalId()).to.equal(0);
+
 				await voting.nextStatus();
 
 				expect(await voting.winningProposalId()).to.equal(SECOND_ACCOUNT_PROPOSAL);
