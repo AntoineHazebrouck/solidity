@@ -8,6 +8,7 @@ contract Voting {
     WorkflowStatus public status;
 
     // store proposals
+    // TODO map proposalIds to Proposal objects, maybe even Voter objects
     uint public proposalsCount;
 
     // store voters
@@ -29,14 +30,11 @@ contract Voting {
         return administrator;
     }
 
-    function addVoter(
-        bool isRegistered,
-        bool hasVoted,
-        uint votedProposalId
-    ) public {
+    // TODO, c'est l'admin qui ajoute les voters, donc on peut utiliser l'adresse ethereum en param
+    function addVoter(address ethereumAddress) public {
         votersCount = votersCount + 1;
-        voters[msg.sender] = Voter(isRegistered, hasVoted, votedProposalId);
-        emit VoterRegistered(msg.sender);
+        voters[ethereumAddress] = Voter(false, false, 0);
+        emit VoterRegistered(ethereumAddress);
     }
 
     function propose() public {
@@ -44,6 +42,15 @@ contract Voting {
             voters[msg.sender].isRegistered = true;
             proposalsCount = proposalsCount + 1;
             emit ProposalRegistered(proposalsCount);
+        }
+    }
+
+    function vote(uint proposalId) public {
+        if (proposalId > 0 && proposalId <= proposalsCount) {
+            voters[msg.sender].hasVoted = true;
+            voters[msg.sender].votedProposalId = proposalId;
+
+            emit Voted(msg.sender, proposalId);
         }
     }
 

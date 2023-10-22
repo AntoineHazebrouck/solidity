@@ -46,12 +46,6 @@ describe("Voting", function () {
 		it("Should add one voter", async function () {
 			const { voting, owner, otherAccount } = await loadFixture(deploy);
 
-			const newVoter = {
-				isRegistered: false,
-				hasVoted: false,
-				votedProposalId: 2
-			};
-
 			await expect(voting.addVoter(newVoter.isRegistered, newVoter.hasVoted, newVoter.votedProposalId))
 				.to
 				.emit(voting, "VoterRegistered")
@@ -157,8 +151,6 @@ describe("Voting", function () {
 				const { voting, owner, otherAccount } = await loadFixture(deploy);
 
 				await voting.addVoter(false, false, 0);
-				await voting.addVoter(false, false, 0);
-				await voting.addVoter(false, false, 0);
 
 				await voting.nextStatus();
 
@@ -170,9 +162,10 @@ describe("Voting", function () {
 				await expect(voting.vote(1))
 					.to
 					.emit(voting, "Voted")
-					.withArgs(owner.address, 2);
+					.withArgs(owner.address, 1);
 
-				expect(await voting.voters(1)[VOTED_PROPOSAL_ID]).to.equal(1)
+				expect((await voting.voters(owner.address))[HAS_VOTED]).to.equal(true)
+				expect((await voting.voters(owner.address))[VOTED_PROPOSAL_ID]).to.equal(1)
 			});
 
 
