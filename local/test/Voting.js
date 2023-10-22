@@ -6,8 +6,8 @@ const {
 const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 const { expect } = require("chai");
 
-const HAS_VOTED = 0;
-const IS_REGISTERED = 1;
+const IS_REGISTERED = 0;
+const HAS_VOTED = 1;
 const VOTED_PROPOSAL_ID = 2;
 
 const REGISTERING_VOTERS = 0;
@@ -168,22 +168,24 @@ describe("Voting", function () {
 				const { firstAccount, secondAccount, thirdAccount, fourthAccount } = await getSomeAccounts();
 				const voting = await deploy(firstAccount);
 
-				await voting.addVoter(firstAccount);
+				await voting.addVoter(secondAccount);
+				await voting.addVoter(thirdAccount);
+				await voting.addVoter(fourthAccount);
 
 				await voting.nextStatus();
 
-				await voting.propose();
+				await voting.proposeTest(secondAccount);
 
 				await voting.nextStatus();
 				await voting.nextStatus();
 
-				await expect(voting.vote(1))
+				await expect(voting.voteTest(thirdAccount, 1))
 					.to
 					.emit(voting, "Voted")
-					.withArgs(firstAccount.address, 1);
+					.withArgs(thirdAccount.address, 1);
 
-				expect((await voting.voters(firstAccount.address))[HAS_VOTED]).to.equal(true)
-				expect((await voting.voters(firstAccount.address))[VOTED_PROPOSAL_ID]).to.equal(1)
+				expect((await voting.voters(thirdAccount.address))[VOTED_PROPOSAL_ID]).to.equal(1);
+				expect((await voting.voters(thirdAccount.address))[HAS_VOTED]).to.equal(true);
 			});
 
 

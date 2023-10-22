@@ -37,11 +37,30 @@ contract Voting {
         emit VoterRegistered(ethereumAddress);
     }
 
+    // parameter for testing purpose
+    function proposeTest(address sender) public {
+        if (status == WorkflowStatus.ProposalsRegistrationStarted) {
+            voters[sender].isRegistered = true;
+            proposalsCount = proposalsCount + 1;
+            emit ProposalRegistered(proposalsCount);
+        }
+    }
+
     function propose() public {
         if (status == WorkflowStatus.ProposalsRegistrationStarted) {
             voters[msg.sender].isRegistered = true;
             proposalsCount = proposalsCount + 1;
             emit ProposalRegistered(proposalsCount);
+        }
+    }
+
+    // parameter for testing purpose
+    function voteTest(address sender, uint proposalId) public {
+        if (proposalId > 0 && proposalId <= proposalsCount) {
+            voters[sender].hasVoted = true;
+            voters[sender].votedProposalId = proposalId;
+
+            emit Voted(sender, proposalId);
         }
     }
 
