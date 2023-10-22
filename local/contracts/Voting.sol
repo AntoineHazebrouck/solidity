@@ -2,8 +2,9 @@
 pragma solidity ^0.8.21;
 
 import "hardhat/console.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Voting {
+contract Voting is Ownable {
     // store current status
     WorkflowStatus public status;
 
@@ -18,12 +19,8 @@ contract Voting {
     mapping(address => Voter) public voters;
     uint public votersCount;
 
-    // store administrator address
-    address private administrator;
-
-    constructor(address _administrator) {
-        console.log("Deploying a Voting with administrator:", _administrator);
-        administrator = _administrator;
+    constructor(address initialOwner) Ownable(initialOwner) {
+        console.log("Deploying a Voting with administrator:", owner());
         votersCount = 0;
         proposalsCount = 0;
         winningProposalId = 0;
@@ -31,11 +28,10 @@ contract Voting {
     }
 
     function getAdministrator() public view returns (address) {
-        return administrator;
+        return owner();
     }
 
-    // TODO, c'est l'admin qui ajoute les voters, donc on peut utiliser l'adresse ethereum en param
-    function addVoter(address ethereumAddress) public {
+    function addVoter(address ethereumAddress) public onlyOwner {
         votersCount = votersCount + 1;
         voters[ethereumAddress] = Voter(false, false, 0);
         emit VoterRegistered(ethereumAddress);
@@ -85,7 +81,7 @@ contract Voting {
         }
     }
 
-    function nextStatus() public {
+    function nextStatus() public onlyOwner {
         WorkflowStatus previousStatus = status;
         if (status == WorkflowStatus.RegisteringVoters) {
             status = WorkflowStatus.ProposalsRegistrationStarted;
@@ -127,8 +123,6 @@ contract Voting {
         VotingSessionEnded,
         VotesTallied
     }
-
-    //  fonction getWinner qui retourne le gagnant
 
     event VoterRegistered(address voterAddress);
     event WorkflowStatusChange(
