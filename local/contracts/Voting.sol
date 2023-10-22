@@ -7,8 +7,10 @@ contract Voting {
     // store current status
     WorkflowStatus public status;
 
+    // store winning proposal
+    uint public winningProposalId;
+
     // store proposals
-    // TODO map proposalIds to Proposal objects, maybe even Voter objects
     mapping(uint => Proposal) public proposals;
     uint public proposalsCount;
 
@@ -93,6 +95,7 @@ contract Voting {
         } else if (status == WorkflowStatus.VotingSessionStarted) {
             status = WorkflowStatus.VotingSessionEnded;
         } else if (status == WorkflowStatus.VotingSessionEnded) {
+            // set winner here
             status = WorkflowStatus.VotesTallied;
         }
         emit WorkflowStatusChange(previousStatus, status);
