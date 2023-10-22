@@ -17,6 +17,9 @@ const VOTING_SESSION_STARTED = 3;
 const VOTING_SESSION_ENDED = 4;
 const VOTES_TALLIED = 5;
 
+const DESCRIPTION = 0;
+const VOTE_COUNT = 1;
+
 describe("Voting", function () {
 	async function getSomeAccounts() {
 		const [firstAccount, secondAccount, thirdAccount, fourthAccount] = await ethers.getSigners();
@@ -93,7 +96,7 @@ describe("Voting", function () {
 				const { firstAccount, secondAccount, thirdAccount, fourthAccount } = await getSomeAccounts();
 				const voting = await deploy(firstAccount);
 
-				await expect(voting.propose())
+				await expect(voting.propose("description"))
 					.not.to.emit(voting, "ProposalRegistered");
 			});
 
@@ -103,10 +106,13 @@ describe("Voting", function () {
 
 				await voting.nextStatus();
 
-				await expect(voting.propose())
+				await expect(voting.propose("description"))
 					.to
 					.emit(voting, "ProposalRegistered")
 					.withArgs(1);
+
+				expect((await voting.proposals(1))[DESCRIPTION]).to.equal("description");
+				expect((await voting.proposals(1))[VOTE_COUNT]).to.equal(0);
 			});
 
 			it("Should not allow proposing when proposals registration is closed", async function () {
@@ -116,7 +122,7 @@ describe("Voting", function () {
 				await voting.nextStatus();
 				await voting.nextStatus();
 
-				await expect(voting.propose())
+				await expect(voting.propose("description"))
 					.not.to.emit(voting, "ProposalRegistered");
 			});
 		});
@@ -154,7 +160,7 @@ describe("Voting", function () {
 
 				await voting.nextStatus();
 
-				await voting.propose();
+				await voting.propose("description");
 
 				await voting.nextStatus();
 				await voting.nextStatus();
@@ -174,7 +180,7 @@ describe("Voting", function () {
 
 				await voting.nextStatus();
 
-				await voting.proposeTest(secondAccount);
+				await voting.proposeTest(secondAccount, "description");
 
 				await voting.nextStatus();
 				await voting.nextStatus();
@@ -186,6 +192,9 @@ describe("Voting", function () {
 
 				expect((await voting.voters(thirdAccount.address))[VOTED_PROPOSAL_ID]).to.equal(1);
 				expect((await voting.voters(thirdAccount.address))[HAS_VOTED]).to.equal(true);
+
+				expect((await voting.proposals(1))[VOTE_COUNT]).to.equal(1);
+				expect((await voting.proposals(1))[DESCRIPTION]).to.equal("description");
 			});
 
 

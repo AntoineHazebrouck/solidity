@@ -9,6 +9,7 @@ contract Voting {
 
     // store proposals
     // TODO map proposalIds to Proposal objects, maybe even Voter objects
+    mapping(uint => Proposal) public proposals;
     uint public proposalsCount;
 
     // store voters
@@ -38,18 +39,22 @@ contract Voting {
     }
 
     // parameter for testing purpose
-    function proposeTest(address sender) public {
+    function proposeTest(address sender, string memory description) public {
         if (status == WorkflowStatus.ProposalsRegistrationStarted) {
             voters[sender].isRegistered = true;
+
             proposalsCount = proposalsCount + 1;
+            proposals[proposalsCount] = Proposal(description, 0);
             emit ProposalRegistered(proposalsCount);
         }
     }
 
-    function propose() public {
+    function propose(string memory description) public {
         if (status == WorkflowStatus.ProposalsRegistrationStarted) {
             voters[msg.sender].isRegistered = true;
+
             proposalsCount = proposalsCount + 1;
+            proposals[proposalsCount] = Proposal(description, 0);
             emit ProposalRegistered(proposalsCount);
         }
     }
@@ -57,6 +62,8 @@ contract Voting {
     // parameter for testing purpose
     function voteTest(address sender, uint proposalId) public {
         if (proposalId > 0 && proposalId <= proposalsCount) {
+            proposals[proposalId].voteCount += 1;
+
             voters[sender].hasVoted = true;
             voters[sender].votedProposalId = proposalId;
 
@@ -66,6 +73,8 @@ contract Voting {
 
     function vote(uint proposalId) public {
         if (proposalId > 0 && proposalId <= proposalsCount) {
+            proposals[proposalId].voteCount += 1;
+
             voters[msg.sender].hasVoted = true;
             voters[msg.sender].votedProposalId = proposalId;
 
