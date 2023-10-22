@@ -13,38 +13,48 @@ const VOTED_PROPOSAL_ID = 2;
 const REGISTERING_VOTERS = 0;
 const PROPOSALS_REGISTRATION_STARTED = 1;
 const PROPOSALS_REGISTRATION_ENDED = 2;
+const VOTING_SESSION_STARTED = 3;
+const VOTING_SESSION_ENDED = 4;
+const VOTES_TALLIED = 5;
+
 describe("Voting", function () {
-	async function deploy() {
-		// Contracts are deployed using the first signer/account by default
-		const [owner, firstAccount, secondAccount] = await ethers.getSigners();
+	async function getSomeAccounts() {
+		const [firstAccount, secondAccount, thirdAccount, fourthAccount] = await ethers.getSigners();
+		return { firstAccount, secondAccount, thirdAccount, fourthAccount };
+	}
 
+	async function deploy(account) {
 		const Voting = await ethers.getContractFactory("Voting");
-		const voting = await Voting.deploy(owner);
+		const voting = await Voting.deploy(account);
 
-		return { voting, owner, firstAccount, secondAccount };
+		return voting;
 	}
 
 	describe("Deployment", function () {
 		it("Should say hello world", async function () {
-			const { voting, owner, firstAccount, secondAccount } = await loadFixture(deploy);
+			const { firstAccount, secondAccount, thirdAccount, fourthAccount } = await getSomeAccounts();
+			const voting = await deploy(firstAccount);
 
 			expect(await voting.helloWorld()).to.equal("Hello World!");
 		});
 		it("Admin should be contract deployer", async function () {
-			const { voting, owner, firstAccount, secondAccount } = await loadFixture(deploy);
+			const { firstAccount, secondAccount, thirdAccount, fourthAccount } = await getSomeAccounts();
+			const voting = await deploy(firstAccount);
 
-			expect(await voting.getAdministrator()).to.equal(owner.address);
+			expect(await voting.getAdministrator()).to.equal((await getSomeAccounts()).firstAccount.address);
 		});
 	});
 
 	describe("Administrator adds voters", function () {
 		it("Should be empty", async function () {
-			const { voting, owner, firstAccount, secondAccount } = await loadFixture(deploy);
+			const { firstAccount, secondAccount, thirdAccount, fourthAccount } = await getSomeAccounts();
+			const voting = await deploy(firstAccount);
 
 			expect(await voting.votersCount()).to.equal(0);
 		});
 		it("Should add one voter", async function () {
-			const { voting, owner, firstAccount, secondAccount } = await loadFixture(deploy);
+			const { firstAccount, secondAccount, thirdAccount, fourthAccount } = await getSomeAccounts();
+			const voting = await deploy(firstAccount);
 
 			await expect(voting.addVoter(firstAccount.address))
 				.to
@@ -63,12 +73,14 @@ describe("Voting", function () {
 	describe("Administrator opens proposals registering", function () {
 
 		it("Should have 'RegisteringVoters' as first status", async function () {
-			const { voting, owner, firstAccount, secondAccount } = await loadFixture(deploy);
+			const { firstAccount, secondAccount, thirdAccount, fourthAccount } = await getSomeAccounts();
+			const voting = await deploy(firstAccount);
 			expect(await voting.status()).to.equal(REGISTERING_VOTERS);
 		});
 
 		it("Should have 'ProposalsRegistrationStarted' when opening proposals registering", async function () {
-			const { voting, owner, firstAccount, secondAccount } = await loadFixture(deploy);
+			const { firstAccount, secondAccount, thirdAccount, fourthAccount } = await getSomeAccounts();
+			const voting = await deploy(firstAccount);
 
 			await expect(voting.nextStatus())
 				.to
@@ -78,14 +90,16 @@ describe("Voting", function () {
 
 		describe("Voters can propose while proposals registration is opened", function () {
 			it("Should not allow proposing when proposals registration is not opened", async function () {
-				const { voting, owner, firstAccount, secondAccount } = await loadFixture(deploy);
+				const { firstAccount, secondAccount, thirdAccount, fourthAccount } = await getSomeAccounts();
+				const voting = await deploy(firstAccount);
 
 				await expect(voting.propose())
 					.not.to.emit(voting, "ProposalRegistered");
 			});
 
 			it("Should allow proposing when proposals registration is opened", async function () {
-				const { voting, owner, firstAccount, secondAccount } = await loadFixture(deploy);
+				const { firstAccount, secondAccount, thirdAccount, fourthAccount } = await getSomeAccounts();
+				const voting = await deploy(firstAccount);
 
 				await voting.nextStatus();
 
@@ -96,7 +110,8 @@ describe("Voting", function () {
 			});
 
 			it("Should not allow proposing when proposals registration is closed", async function () {
-				const { voting, owner, firstAccount, secondAccount } = await loadFixture(deploy);
+				const { firstAccount, secondAccount, thirdAccount, fourthAccount } = await getSomeAccounts();
+				const voting = await deploy(firstAccount);
 
 				await voting.nextStatus();
 				await voting.nextStatus();
@@ -107,7 +122,8 @@ describe("Voting", function () {
 		});
 
 		it("Should have 'ProposalsRegistrationEnded' when closing proposals registering", async function () {
-			const { voting, owner, firstAccount, secondAccount } = await loadFixture(deploy);
+			const { firstAccount, secondAccount, thirdAccount, fourthAccount } = await getSomeAccounts();
+			const voting = await deploy(firstAccount);
 
 			await voting.nextStatus();
 
@@ -120,7 +136,8 @@ describe("Voting", function () {
 
 	describe("Administrator opens voting session", function () {
 		it("Should not allow voting when voting session has not started yet", async function () {
-			const { voting, owner, firstAccount, secondAccount } = await loadFixture(deploy);
+			const { firstAccount, secondAccount, thirdAccount, fourthAccount } = await getSomeAccounts();
+			const voting = await deploy(firstAccount);
 
 			await expect(voting.vote(2))
 				.not.to.emit(voting, "ProposalRegistered");
@@ -129,7 +146,8 @@ describe("Voting", function () {
 		describe("Voters can vote while voting session is open", function () {
 
 			it("Should not allow voting for non-existing proposal", async function () {
-				const { voting, owner, firstAccount, secondAccount } = await loadFixture(deploy);
+				const { firstAccount, secondAccount, thirdAccount, fourthAccount } = await getSomeAccounts();
+				const voting = await deploy(firstAccount);
 
 				await voting.addVoter(firstAccount);
 				await voting.addVoter(secondAccount);
@@ -147,9 +165,10 @@ describe("Voting", function () {
 			});
 
 			it("Should vote", async function () {
-				const { voting, owner, firstAccount, secondAccount } = await loadFixture(deploy);
+				const { firstAccount, secondAccount, thirdAccount, fourthAccount } = await getSomeAccounts();
+				const voting = await deploy(firstAccount);
 
-				await voting.addVoter(owner);
+				await voting.addVoter(firstAccount);
 
 				await voting.nextStatus();
 
@@ -161,16 +180,18 @@ describe("Voting", function () {
 				await expect(voting.vote(1))
 					.to
 					.emit(voting, "Voted")
-					.withArgs(owner.address, 1);
+					.withArgs(firstAccount.address, 1);
 
-				expect((await voting.voters(owner.address))[HAS_VOTED]).to.equal(true)
-				expect((await voting.voters(owner.address))[VOTED_PROPOSAL_ID]).to.equal(1)
+				expect((await voting.voters(firstAccount.address))[HAS_VOTED]).to.equal(true)
+				expect((await voting.voters(firstAccount.address))[VOTED_PROPOSAL_ID]).to.equal(1)
 			});
 
 
 		});
+
 		it("Should not allow voting when voting session is closed", async function () {
-			const { voting, owner, firstAccount, secondAccount } = await loadFixture(deploy);
+			const { firstAccount, secondAccount, thirdAccount, fourthAccount } = await getSomeAccounts();
+			const voting = await deploy(firstAccount);
 
 			await voting.nextStatus();
 			await voting.nextStatus();
@@ -181,6 +202,32 @@ describe("Voting", function () {
 				.not.to.emit(voting, "ProposalRegistered");
 		});
 
-	});
+		describe("Administrator counts votes", function () {
 
+			it("Should have 'VotesTallied' when counting votes", async function () {
+				const { firstAccount, secondAccount, thirdAccount, fourthAccount } = await getSomeAccounts();
+				const voting = await deploy(firstAccount);
+
+				await voting.nextStatus();
+				await voting.nextStatus();
+				await voting.nextStatus();
+				await voting.nextStatus();
+
+				expect(await voting.status()).to.equal(VOTING_SESSION_ENDED);
+
+				await voting.nextStatus();
+
+				expect(await voting.status()).to.equal(VOTES_TALLIED);
+
+			});
+
+			it("Should count votes by proposal", async function () {
+				const { firstAccount, secondAccount, thirdAccount, fourthAccount } = await getSomeAccounts();
+				const voting = await deploy(firstAccount);
+
+
+			});
+		});
+
+	});
 });
