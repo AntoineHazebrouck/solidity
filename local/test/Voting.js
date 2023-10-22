@@ -124,18 +124,71 @@ describe("Voting", function () {
 		});
 	});
 
-	// describe("Administrator opens voting session", function () {
+	describe("Administrator opens voting session", function () {
+		it("Should not allow voting when voting session has not started yet", async function () {
+			const { voting, owner, otherAccount } = await loadFixture(deploy);
 
-	// 	describe("Voters can only vote while voting session is open", function () {
+			await expect(voting.vote(2))
+				.not.to.emit(voting, "ProposalRegistered");
+		});
 
-	// 		it("Should not allow voting when status is not VotingSessionStarted", async function () {
-	// 			const { voting, owner, otherAccount } = await loadFixture(deploy);
+		describe("Voters can vote while voting session is open", function () {
 
-	// 			await expect(voting.propose())
-	// 				.not.to.emit(voting, "ProposalRegistered");
-	// 		});
-	// 	});
+			it("Should not allow voting for non-existing proposal", async function () {
+				const { voting, owner, otherAccount } = await loadFixture(deploy);
 
-	// });
+				await voting.addVoter(false, false, 0);
+				await voting.addVoter(false, false, 0);
+				await voting.addVoter(false, false, 0);
+
+				await voting.nextStatus();
+
+				await voting.propose();
+
+				await voting.nextStatus();
+				await voting.nextStatus();
+
+				await expect(voting.vote(2))
+					.not.to
+					.emit(voting, "Voted");
+			});
+
+			it("Should vote", async function () {
+				const { voting, owner, otherAccount } = await loadFixture(deploy);
+
+				await voting.addVoter(false, false, 0);
+				await voting.addVoter(false, false, 0);
+				await voting.addVoter(false, false, 0);
+
+				await voting.nextStatus();
+
+				await voting.propose();
+
+				await voting.nextStatus();
+				await voting.nextStatus();
+
+				await expect(voting.vote(1))
+					.to
+					.emit(voting, "Voted")
+					.withArgs(owner.address, 2);
+
+				expect(await voting.voters(1)[VOTED_PROPOSAL_ID]).to.equal(1)
+			});
+
+
+		});
+		it("Should not allow voting when voting session is closed", async function () {
+			const { voting, owner, otherAccount } = await loadFixture(deploy);
+
+			await voting.nextStatus();
+			await voting.nextStatus();
+			await voting.nextStatus();
+			await voting.nextStatus();
+
+			await expect(voting.vote(2))
+				.not.to.emit(voting, "ProposalRegistered");
+		});
+
+	});
 
 });
