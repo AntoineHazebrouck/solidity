@@ -96,7 +96,15 @@ contract Voting {
         } else if (status == WorkflowStatus.VotingSessionStarted) {
             status = WorkflowStatus.VotingSessionEnded;
         } else if (status == WorkflowStatus.VotingSessionEnded) {
-            // set winner here
+            uint maxVoteCount = 0;
+            uint maxVoteCountIndex = 0;
+            for (uint index = 1; index <= proposalsCount; index++) {
+                if (proposals[index].voteCount > maxVoteCount) {
+                    maxVoteCount = proposals[index].voteCount;
+                    maxVoteCountIndex = index;
+                }
+            }
+            winningProposalId = maxVoteCountIndex;
             status = WorkflowStatus.VotesTallied;
         }
         emit WorkflowStatusChange(previousStatus, status);
