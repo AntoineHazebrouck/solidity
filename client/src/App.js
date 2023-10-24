@@ -2,41 +2,218 @@ import React, { useEffect, useState } from 'react';
 import { ethers } from "ethers";
 
 function App() {
-	const [depositValue, setDepositValue] = useState(0);
-	const [greet, setGreet] = useState('');
-	const [greetingValue, setGreetingValue] = useState('');
-	const [balance, setBalance] = useState();
 
-	const provider = new ethers.providers.Web3Provider(window.ethereum)
-	const signer = provider.getSigner()
+	const provider = new ethers.providers.Web3Provider(window.ethereum);
+	const signer = provider.getSigner();
 	const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 	const ABI = [
 		{
 			"inputs": [
 				{
-					"internalType": "string",
-					"name": "_greeting",
-					"type": "string"
+					"internalType": "address",
+					"name": "initialOwner",
+					"type": "address"
 				}
 			],
 			"stateMutability": "nonpayable",
 			"type": "constructor"
 		},
 		{
-			"inputs": [],
-			"name": "deposit",
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "owner",
+					"type": "address"
+				}
+			],
+			"name": "OwnableInvalidOwner",
+			"type": "error"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "account",
+					"type": "address"
+				}
+			],
+			"name": "OwnableUnauthorizedAccount",
+			"type": "error"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": true,
+					"internalType": "address",
+					"name": "previousOwner",
+					"type": "address"
+				},
+				{
+					"indexed": true,
+					"internalType": "address",
+					"name": "newOwner",
+					"type": "address"
+				}
+			],
+			"name": "OwnershipTransferred",
+			"type": "event"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": false,
+					"internalType": "uint256",
+					"name": "proposalId",
+					"type": "uint256"
+				}
+			],
+			"name": "ProposalRegistered",
+			"type": "event"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": false,
+					"internalType": "address",
+					"name": "voter",
+					"type": "address"
+				},
+				{
+					"indexed": false,
+					"internalType": "uint256",
+					"name": "proposalId",
+					"type": "uint256"
+				}
+			],
+			"name": "Voted",
+			"type": "event"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": false,
+					"internalType": "address",
+					"name": "voterAddress",
+					"type": "address"
+				}
+			],
+			"name": "VoterRegistered",
+			"type": "event"
+		},
+		{
+			"anonymous": false,
+			"inputs": [
+				{
+					"indexed": false,
+					"internalType": "enum Voting.WorkflowStatus",
+					"name": "previousStatus",
+					"type": "uint8"
+				},
+				{
+					"indexed": false,
+					"internalType": "enum Voting.WorkflowStatus",
+					"name": "newStatus",
+					"type": "uint8"
+				}
+			],
+			"name": "WorkflowStatusChange",
+			"type": "event"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "ethereumAddress",
+					"type": "address"
+				}
+			],
+			"name": "addVoter",
 			"outputs": [],
-			"stateMutability": "payable",
+			"stateMutability": "nonpayable",
 			"type": "function"
 		},
 		{
 			"inputs": [],
-			"name": "greet",
+			"name": "getAdministrator",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "helloWorld",
 			"outputs": [
 				{
 					"internalType": "string",
 					"name": "",
 					"type": "string"
+				}
+			],
+			"stateMutability": "pure",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "nextStatus",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "owner",
+			"outputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"name": "proposals",
+			"outputs": [
+				{
+					"internalType": "string",
+					"name": "description",
+					"type": "string"
+				},
+				{
+					"internalType": "uint256",
+					"name": "voteCount",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "proposalsCount",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
 				}
 			],
 			"stateMutability": "view",
@@ -46,13 +223,150 @@ function App() {
 			"inputs": [
 				{
 					"internalType": "string",
-					"name": "_greeting",
+					"name": "description",
 					"type": "string"
 				}
 			],
-			"name": "setGreeting",
+			"name": "propose",
 			"outputs": [],
 			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "sender",
+					"type": "address"
+				},
+				{
+					"internalType": "string",
+					"name": "description",
+					"type": "string"
+				}
+			],
+			"name": "proposeTest",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "renounceOwnership",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "status",
+			"outputs": [
+				{
+					"internalType": "enum Voting.WorkflowStatus",
+					"name": "",
+					"type": "uint8"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "newOwner",
+					"type": "address"
+				}
+			],
+			"name": "transferOwnership",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "uint256",
+					"name": "proposalId",
+					"type": "uint256"
+				}
+			],
+			"name": "vote",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "sender",
+					"type": "address"
+				},
+				{
+					"internalType": "uint256",
+					"name": "proposalId",
+					"type": "uint256"
+				}
+			],
+			"name": "voteTest",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "address",
+					"name": "",
+					"type": "address"
+				}
+			],
+			"name": "voters",
+			"outputs": [
+				{
+					"internalType": "bool",
+					"name": "isRegistered",
+					"type": "bool"
+				},
+				{
+					"internalType": "bool",
+					"name": "hasVoted",
+					"type": "bool"
+				},
+				{
+					"internalType": "uint256",
+					"name": "votedProposalId",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "votersCount",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
+			"type": "function"
+		},
+		{
+			"inputs": [],
+			"name": "winningProposalId",
+			"outputs": [
+				{
+					"internalType": "uint256",
+					"name": "",
+					"type": "uint256"
+				}
+			],
+			"stateMutability": "view",
 			"type": "function"
 		}
 	];
@@ -63,58 +377,19 @@ function App() {
 			await provider.send("eth_requestAccounts", []);
 		}
 
-		const getGreeting = async () => {
-			const greeting = await contract.greet();
-			setGreet(greeting);
-		}
-
-		const getBalance = async () => {
-			const balance = await provider.getBalance(contractAddress);
-			setBalance(ethers.utils.formatEther(balance));
-		}
-
 		requestAccounts()
-			.catch(console.error)
-		getBalance()
-			.catch(console.error)
-		getGreeting()
-			.catch(console.error)
-	}, [])
-
-	const handleDepositChange = (e) => {
-		setDepositValue(e.target.value)
-	}
-
-	const handleGreetingChange = (e) => {
-		setGreetingValue(e.target.value);
-	}
-
-	const handleDepositSubmit = async (e) => {
-		e.preventDefault();
-		const ethValue = ethers.utils.parseEther(depositValue)
-		const deposit = await contract.deposit({ value: ethValue });
-		await deposit.wait();
-		const balance = await provider.getBalance(contractAddress);
-		setBalance(ethers.utils.formatEther(balance));
-	}
-
-	const handleGreetingSubmit = async (e) => {
-		e.preventDefault();
-		await contract.setGreeting(greetingValue)
-		setGreet(greetingValue);
-		setGreetingValue('');
-	}
+			.catch(console.error);
+	}, []);
 
 	return (
 		<div className="container">
 			<div className="row mt-5">
 
 				<div className="col">
-					<h3>{greet}</h3>
-					<p>Contract Balance: {balance} ETH</p>
+					<h3>Hello world</h3>
 				</div>
 
-				<div className="col">
+				{/* <div className="col">
 					<div className="mb-3">
 						<h4>Deposit ETH</h4>
 						<form onSubmit={handleDepositSubmit}>
@@ -132,7 +407,7 @@ function App() {
 							<button type="submit" className="btn btn-dark">Change</button>
 						</form>
 					</div>
-				</div>
+				</div> */}
 			</div>
 		</div>
 	);
