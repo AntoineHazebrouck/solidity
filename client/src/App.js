@@ -3,8 +3,9 @@ import { ethers } from "ethers";
 
 function App() {
 
-	const provider = new ethers.providers.Web3Provider(window.ethereum);
-	const signer = provider.getSigner();
+	const url = "ws://localhost:8545";
+	const customWsProvider = new ethers.providers.WebSocketProvider(url);
+
 	const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 	const ABI = [
 		{
@@ -370,44 +371,42 @@ function App() {
 			"type": "function"
 		}
 	];
-	const contract = new ethers.Contract(contractAddress, ABI, signer);
+
+	const contract = new ethers.Contract(contractAddress, ABI, customWsProvider);
+
+	// let privateKey = 'your-privatekey-here';
+	// let wallet = new ethers.Wallet(privateKey, customWsProvider);
+	// console.log("wallet connected for purchasing...")
+
+
+
+
+
+
+	const [greet, setGreet] = useState('');
+
+	// const signer = provider.getSigner();
+
 
 	useEffect(() => {
-		const requestAccounts = async () => {
-			await provider.send("eth_requestAccounts", []);
+		const getGreeting = async () => {
+			const greeting = await contract.helloWorld();
+			setGreet(greeting);
 		}
 
-		requestAccounts()
+
+		getGreeting()
 			.catch(console.error);
-	}, []);
+	}, [contract]);
+
 
 	return (
 		<div className="container">
 			<div className="row mt-5">
 
 				<div className="col">
-					<h3>Hello world</h3>
+					<h3>Hello {greet}</h3>
 				</div>
-
-				{/* <div className="col">
-					<div className="mb-3">
-						<h4>Deposit ETH</h4>
-						<form onSubmit={handleDepositSubmit}>
-							<div className="mb-3">
-								<input type="number" className="form-control" placeholder="0" onChange={handleDepositChange} value={depositValue} />
-							</div>
-							<button type="submit" className="btn btn-success">Deposit</button>
-						</form>
-
-						<h4 className="mt-3">Change Greeting</h4>
-						<form onSubmit={handleGreetingSubmit}>
-							<div className="mb-3">
-								<input type="text" className="form-control" placeholder="" onChange={handleGreetingChange} value={greetingValue} />
-							</div>
-							<button type="submit" className="btn btn-dark">Change</button>
-						</form>
-					</div>
-				</div> */}
 			</div>
 		</div>
 	);

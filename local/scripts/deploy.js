@@ -7,7 +7,7 @@ async function main() {
 
 	await voting.waitForDeployment();
 
-	console.log("Voting deployed to : ", voting.target + " with owner : " + owner.address);
+	console.log("Voting deployed to : " + await voting.getAddress() + " with owner : " + owner.address);
 }
 
 
