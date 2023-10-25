@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { ethers } from "ethers";
 
-function App() {
+const metamaskProvider = new ethers.providers.Web3Provider(window.ethereum);
+const signer = metamaskProvider.getSigner();
 
-	const url = "ws://localhost:8545";
-	const customWsProvider = new ethers.providers.WebSocketProvider(url);
-
-	const contractAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
-	const ABI = [
+const customWsProvider = new ethers.providers.WebSocketProvider("ws://localhost:8545");
+const voting = {
+	contractAddress: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+	ABI: [
 		{
 			"inputs": [
 				{
@@ -370,22 +370,17 @@ function App() {
 			"stateMutability": "view",
 			"type": "function"
 		}
-	];
+	]
+}
 
-	const contract = new ethers.Contract(contractAddress, ABI, customWsProvider);
-
-	// let privateKey = 'your-privatekey-here';
-	// let wallet = new ethers.Wallet(privateKey, customWsProvider);
-	// console.log("wallet connected for purchasing...")
-
-
-
-
-
-
+function App() {
 	const [greet, setGreet] = useState('');
+	const [accounts, setAccounts] = useState('');
 
-	// const signer = provider.getSigner();
+
+	const contract = new ethers.Contract(voting.contractAddress, voting.ABI, customWsProvider);
+
+
 
 
 	useEffect(() => {
@@ -394,10 +389,19 @@ function App() {
 			setGreet(greeting);
 		}
 
+		const getAccounts = async () => {
+			const accounts = await metamaskProvider.listAccounts();
+			setAccounts(accounts);
+		}
+
+
+
 
 		getGreeting()
 			.catch(console.error);
-	}, [contract]);
+		getAccounts()
+			.catch(console.error);
+	}, [contract, metamaskProvider]);
 
 
 	return (
@@ -406,6 +410,7 @@ function App() {
 
 				<div className="col">
 					<h3>Hello {greet}</h3>
+					<h3>{accounts}</h3>
 				</div>
 			</div>
 		</div>
