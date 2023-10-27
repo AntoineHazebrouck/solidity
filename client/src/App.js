@@ -374,43 +374,31 @@ const voting = {
 }
 
 function App() {
-	const [greet, setGreet] = useState('');
-	const [accounts, setAccounts] = useState('');
+	const [accounts, setAccounts] = useState([]);
+	const [selectedAddress, setSelectedAddress] = useState('');
+	const contract = new ethers.Contract(voting.contractAddress, voting.ABI, customWsProvider.getSigner());
 
+	const metaMaskLogin = async () => {
+		const retrieved_accounts = await metamaskProvider.listAccounts();
+		setAccounts(retrieved_accounts);
+	}
 
-	const contract = new ethers.Contract(voting.contractAddress, voting.ABI, customWsProvider);
-
-
-
-
-	useEffect(() => {
-		const getGreeting = async () => {
-			const greeting = await contract.helloWorld();
-			setGreet(greeting);
-		}
-
-		const getAccounts = async () => {
-			const accounts = await metamaskProvider.listAccounts();
-			setAccounts(accounts);
-		}
-
-
-
-
-		getGreeting()
-			.catch(console.error);
-		getAccounts()
-			.catch(console.error);
-	}, [contract, metamaskProvider]);
-
+	const addAddress = async () => {
+		await contract.addVoter(selectedAddress);
+		setSelectedAddress('')
+	}
 
 	return (
 		<div className="container">
 			<div className="row mt-5">
 
 				<div className="col">
-					<h3>Hello {greet}</h3>
-					<h3>{accounts}</h3>
+					<h3>Hello</h3>
+					<button onClick={metaMaskLogin}>Se connecter à Metamask</button>
+					<h3>Liste des comptes:</h3>
+					<input onChange={(evt) => { setSelectedAddress(evt.target.value) }} />
+					<p>Adresse sélectionnée : {selectedAddress}</p>
+					<button onClick={addAddress}>ajouter adresse</button>
 				</div>
 			</div>
 		</div>

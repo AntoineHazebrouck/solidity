@@ -1,3 +1,39 @@
+# Processus
+
+1. L'administrateur du vote inscrit une liste blanche d'électeurs identifiés par leur adresse Ethereum.
+
+	- les utilisateurs n'ont pas acces a rien
+		```html
+			<h2 style="text-align: center;">Voting System</h2>
+<p>&nbsp;</p>
+<p style="text-align: center;">The administrator is currently defining authorized voters.</p>
+<p>&nbsp;</p>
+		```
+	- l'admin ajoute des electeurs avec leur adresse ethereum
+		- il submit
+
+2. L'administrateur du vote démarre la session d'enregistrement des propositions.
+Les électeurs inscrits peuvent soumettre leurs propositions pendant que la session d'enregistrement est active.
+
+	- les utilisateurs n'ont pas acces a rien
+	- l'administrateur appuie sur "ouvrir la session de proposition"
+	- les utilisateurs peuvent se proposer avec un bouton
+		- si ils sont deja proposés il peuvent pu
+
+3. L'administrateur du vote clôture la session d'enregistrement des propositions.
+
+	- l'administrateur appuie sur un bouton pour cloturer les propositions
+
+4. L'administrateur du vote lance la session de vote.
+5. Les électeurs inscrits votent pour leur proposition favorite.
+	- l'administrateur peut terminer le vote
+	- les electeur peuvent voter, le dernier proposé cliqué est pris en compte
+6. L'administrateur du vote clôture la session de vote.
+	- les utilisateurs n'ont pas acces a rien
+7. L'administrateur du vote comptabilise les votes.
+8. Tout le monde peut vérifier les derniers détails de la proposition gagnante.
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
