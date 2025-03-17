@@ -1,6 +1,10 @@
 # Deploy contract
 
 ```shell
+npm install
+```
+
+```shell
 npx hardhat compile
 npx hardhat node
 ```

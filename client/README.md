@@ -1,3 +1,9 @@
+# Run UI
+
+```shell
+chrome.exe --remote-debugging-port=9222
+```
+
 # Processus
 
 1. L'administrateur du vote inscrit une liste blanche d'électeurs identifiés par leur adresse Ethereum.
